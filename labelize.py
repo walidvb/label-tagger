@@ -14,7 +14,6 @@ def init():
 
 def labelize(dir, run_simulation):
 	text.delete("1.0", END)
-
 	output = ""
 	for label in os.listdir(dir):
 		if not re.match(r"^\.",label):
@@ -23,15 +22,19 @@ def labelize(dir, run_simulation):
 			for parent, subdirs, file in os.walk(dir+"/"+label):
 				all_files = filter_files([os.path.join(parent, f) for f in os.listdir(parent)])
 				for f in all_files:
+					tag = ''
+					if not run_simulation:
+						try:
+							set_label_to(f, label)
+						except:
+							tag = 'error'
 					filename = f.split('/')[-1]
 					output += "    "
-					text.insert('end', "    ")
+					text.insert('end', "    ", tag)
 					output += filename
-					text.insert('end', filename)
+					text.insert('end', filename, tag)
 					output += "\n"
-					text.insert('end', "\n")
-					if not run_simulation:
-						set_label_to(f, label)
+					text.insert('end', "\n", tag)
 	print output
 
 
@@ -63,10 +66,10 @@ def init_ui():
 	Button(buttons, text="Simulate", command=run_as_simulation).pack(side=LEFT)
 	Button(buttons, text="Run", command=run_normal).pack(side=LEFT)
 	Button(buttons, text="Quit", command=exit).pack(side=LEFT)
-
 	output = Frame(root).pack(side=BOTTOM)
 	text = Text(output)
 	text.pack(side=TOP)
+	text.tag_config('error', foreground="red")
 
 def set_label_to(file, label_name):
 	tags = EasyID3(file)
